@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal
 from pydantic import BaseModel, Field
 
@@ -29,6 +30,20 @@ class PredictionResponse(BaseModel):
 
     model_version: str
     risk_level: Literal["LOW", "MEDIUM", "HIGH"]
+    fraud_probability: float
+    anomaly_score: float
+    is_unsupervised_anomaly: bool
+    decision_reason: str
+
+class PredictionLogOut(BaseModel):
+    model_config = {"from_attributes": True, "protected_namespaces": ()}
+
+    id: int
+    created_at: datetime
+    step: int
+    transaction_type: str
+    amount: float
+    risk_level: str
     fraud_probability: float
     anomaly_score: float
     is_unsupervised_anomaly: bool
