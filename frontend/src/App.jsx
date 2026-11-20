@@ -24,6 +24,26 @@ const INITIAL_FORM = {
   newbalanceDest: 0,
 };
 
+async function loadDashboardPayload() {
+  const [healthRes, statsRes, historyRes] = await Promise.all([
+    fetch(`${API_BASE_URL}/health`),
+    fetch(`${API_BASE_URL}/api/v1/stats`),
+    fetch(`${API_BASE_URL}/api/v1/history?limit=15`),
+  ]);
+
+  if (!healthRes.ok || !statsRes.ok || !historyRes.ok) {
+    throw new Error('Gagal mengambil data dari server FastAPI.');
+  }
+
+  const [healthData, statsData, historyData] = await Promise.all([
+    healthRes.json(),
+    statsRes.json(),
+    historyRes.json(),
+  ]);
+
+  return { healthData, statsData, historyData };
+}
+
 export default function App() {
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [prediction, setPrediction] = useState(null);
@@ -40,22 +60,7 @@ export default function App() {
 
   const fetchDashboardData = useCallback(async () => {
     try {
-      const [healthRes, statsRes, historyRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/health`),
-        fetch(`${API_BASE_URL}/api/v1/stats`),
-        fetch(`${API_BASE_URL}/api/v1/history?limit=15`),
-      ]);
-
-      if (!healthRes.ok || !statsRes.ok || !historyRes.ok) {
-        throw new Error('Gagal mengambil data dari server FastAPI.');
-      }
-
-      const [healthData, statsData, historyData] = await Promise.all([
-        healthRes.json(),
-        statsRes.json(),
-        historyRes.json(),
-      ]);
-
+      const { healthData, statsData, historyData } = await loadDashboardPayload();
       setHealth(healthData);
       setStats(statsData);
       setHistory(historyData);
@@ -69,14 +74,36 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+    let ignore = false;
+
+    loadDashboardPayload()
+      .then(({ healthData, statsData, historyData }) => {
+        if (!ignore) {
+          setHealth(healthData);
+          setStats(statsData);
+          setHistory(historyData);
+          setError('');
+        }
+      })
+      .catch(() => {
+        if (!ignore) {
+          setHealth({ status: 'offline', model_version: '-' });
+          setError(
+            'Tidak dapat terhubung ke backend FastAPI (http://127.0.0.1:8000). Pastikan server Uvicorn sedang menyala.'
+          );
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'type' ? value : value,
+      [name]: value,
     }));
   };
 
