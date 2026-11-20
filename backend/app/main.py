@@ -24,6 +24,7 @@ app.add_middleware(
 )
 
 @app.get("/health")
+variabel_test
 def health_check():
     return {
         "status": "healthy",
