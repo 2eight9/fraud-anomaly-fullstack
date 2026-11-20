@@ -1,0 +1,15 @@
+# Virtual Environment & Cache Python
+venv/
+__pycache__/
+*.py[cod]
+
+# Rahasia / Kredensial (untuk tahap PostgreSQL nanti)
+.env
+
+# Dataset mentah berukuran besar
+*.csv
+*.zip
+
+# Sistem Operasi & Editor
+.DS_Store
+.vscode/

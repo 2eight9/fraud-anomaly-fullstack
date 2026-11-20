@@ -1,0 +1,45 @@
+{
+  "model_version": "paysim_hybrid_v2",
+  "environment": {
+    "sklearn_version": "1.6.1",
+    "lightgbm_version": "4.6.0",
+    "joblib_version": "1.6.0"
+  },
+  "raw_input_fields": [
+    "step",
+    "type",
+    "amount",
+    "oldbalanceOrg",
+    "newbalanceOrig",
+    "oldbalanceDest",
+    "newbalanceDest"
+  ],
+  "engineered_num_features": [
+    "hour_of_day",
+    "amount",
+    "oldbalanceOrg",
+    "newbalanceOrig",
+    "oldbalanceDest",
+    "newbalanceDest",
+    "errorBalanceOrig",
+    "errorBalanceDest",
+    "is_orig_drained",
+    "is_dest_unchanged"
+  ],
+  "cat_features": [
+    "type"
+  ],
+  "allowed_transaction_types": [
+    "TRANSFER",
+    "CASH_OUT"
+  ],
+  "thresholds": {
+    "lgb_high_risk_prob": 0.8,
+    "lgb_medium_risk_prob": 0.4,
+    "iso_anomaly_cutoff": -0.101297
+  },
+  "metrics": {
+    "pr_auc_lightgbm": 0.9978,
+    "pr_auc_isolation_forest": 0.054
+  }
+}
